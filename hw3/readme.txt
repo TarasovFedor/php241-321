@@ -1,0 +1,1 @@
+Это 1.2. Домашняя работа: Solve the equation.
