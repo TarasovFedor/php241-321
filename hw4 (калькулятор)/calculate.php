@@ -26,7 +26,7 @@ function calculate($expression) {
             $argument = calculate($arguments[$i]);
             $difference -= $argument;
         }
-
+        
         return $difference;
     }
     
@@ -56,7 +56,7 @@ function calculate($expression) {
 
             $division /= $argument;
         }
-
+        
         return $division;
     }
 
@@ -65,24 +65,24 @@ function calculate($expression) {
 
 function braceCheck($expression): bool {
     $brace = 0;
-
+    
     for ($i = 0; $i < strlen($expression); $i++) {
         if ($expression[$i] === '(') {
             $brace++;
         }
         elseif ($expression[$i] === ')') {
             $brace--;
-
+            
             if ($brace < 0) {
                 return false;
             }
         }
     }
-
+    
     if ($brace !== 0) {
         return false; 
     }
-
+    
     return true;
 }
 
@@ -91,14 +91,14 @@ function handleBraces($expression) {
     if ($start === false) {
         return calculate($expression);
     }
-
+    
     if (!braceCheck($expression)) {
         return 'Error: incorrect braces';
     }
 
     $index = 1;
     $end = $start + 1;
-
+    
     while (($index > 0) && ($end < strlen($expression))) {
         if ($expression[$end] === ')') {
             $index--;
@@ -108,7 +108,7 @@ function handleBraces($expression) {
         }
         $end++;
     }
-
+    
     $end--;
 
     $new_expression = substr($expression, 0, $start);
@@ -118,8 +118,16 @@ function handleBraces($expression) {
     return handleBraces($new_expression);
 }
 
-// $expr = '2*4-(5-1)+2';
 
-$expr = '12+6*(13*2-(2+3)/3)-1';
+session_start();
 
-echo handleBraces($expr);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $expression = $_POST['expression'];
+    
+    $result = handleBraces($expression);
+
+    echo htmlspecialchars($result);
+}
+else {
+    echo 'An error has accured';
+}
