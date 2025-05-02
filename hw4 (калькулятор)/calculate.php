@@ -1,9 +1,12 @@
 <?php
+
+require_once dirname(__DIR__) . '/hw5 (тригонометрия)/trigonometry.php';
+
 function calculate($expression) {
     if (is_numeric($expression)) {
         return $expression;
     }
-
+    
     $arguments = explode('+', $expression);
     
     if (count($arguments) > 1) {
@@ -13,7 +16,7 @@ function calculate($expression) {
             $argument = calculate($arguments[$i]);
             $sum += $argument;
         }
-
+        
         return $sum;
     }
     
@@ -39,7 +42,7 @@ function calculate($expression) {
             $argument = calculate($arguments[$i]);
             $product *= $argument;
         }
-
+        
         return $product;
     }
     
@@ -53,13 +56,13 @@ function calculate($expression) {
             if ($argument === 0) {
                 return 'Error: division by zero';
             }
-
+            
             $division /= $argument;
         }
         
         return $division;
     }
-
+    
     return 'An error has accured';
 }
 
@@ -86,7 +89,11 @@ function braceCheck($expression): bool {
     return true;
 }
 
-function handleBraces($expression) {
+function handleExpression($expression) {
+    while(preg_match('~(sin|cos|tan|tg|cot|ctg)\((\d+(\.\d+\))?)\)~', $expression, $found)) {
+        $expression = handleTrigonometry($expression);
+    }
+    
     $start = strpos($expression, '('); 
     if ($start === false) {
         return calculate($expression);
@@ -95,7 +102,7 @@ function handleBraces($expression) {
     if (!braceCheck($expression)) {
         return 'Error: incorrect braces';
     }
-
+    
     $index = 1;
     $end = $start + 1;
     
@@ -110,24 +117,36 @@ function handleBraces($expression) {
     }
     
     $end--;
-
+    
     $new_expression = substr($expression, 0, $start);
-    $new_expression .= handleBraces(substr($expression, $start + 1, $end - $start - 1));
+    $new_expression .= handleExpression(substr($expression, $start + 1, $end - $start - 1));
     $new_expression .= substr($expression, $end + 1);
     
-    return handleBraces($new_expression);
+    return handleExpression($new_expression);
 }
 
+function handleTrigonometry($expression) {
+    if (preg_match('~(sin|cos|tan|tg|cot|ctg)\((\d+(\.\d+\))?)\)~', $expression, $found)) {
+        $operator = $found[1];
+        $number = $found[2];
+    
+        $answer = trigonometry($operator, $number);
+    
+        $expression = preg_replace('~(sin|cos|tan|tg|cot|ctg)\(\d+(\.\d+\))?\)~', $answer, $expression, 1);
+    
+        return $expression;
+    }
+}
 
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $expression = $_POST['expression'];
     
-    $result = handleBraces($expression);
-
+    $result = handleExpression($expression);
+    
     echo htmlspecialchars($result);
 }
-else {
-    echo 'An error has accured';
-}
+// else {
+    //     echo 'An error has accured';
+    // }
