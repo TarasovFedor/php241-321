@@ -20,7 +20,7 @@ function renderViewer(mysqli $mysqli, string $sort, int $current_page): string {
     $result = $mysqli -> query($sql);
 
     if (!$result) {
-        return "<p class='error'>Ошибка запроса: $mysqli->error</p>";
+        return "<p class='error'>Ошибка SQL-запроса: $mysqli->error</p>";
     }
 
     $total_res = $mysqli -> query("SELECT COUNT(*) FROM `contacts`");
@@ -31,7 +31,7 @@ function renderViewer(mysqli $mysqli, string $sort, int $current_page): string {
     <div class="submenu">
         <?php
         $sorts = [
-            'default' => 'По умолчанию',
+            'default' => 'По умолчанию (по индексам)',
             'byname' => 'По фамилии',
             'bybirth' => 'По дате рождения'
         ];
@@ -71,6 +71,12 @@ function renderViewer(mysqli $mysqli, string $sort, int $current_page): string {
         <?php endwhile; ?>
         </tbody>
     </table>
+
+    <div class="pagination">
+        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+            <a href="index.php?page=viewer&sort=<?= $sort ?>&p=<?= $i ?>" class="<?= $i == $current_page ? 'active' : '' ?>"><?= $i ?></a>
+        <?php endfor ?>
+    </div>
 
     <?php
     return "";
